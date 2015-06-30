@@ -73,6 +73,20 @@ my $person = {
 };
 ```
 
+### Avoid unnecessary line noise
+
+Avoid introducing [write-only](https://en.wikipedia.org/wiki/Write-only_language) statements, or line noise, where the code looks like spurious characters from signal noise in the communication line. Omitting parenthesis where they are not required, and carefully utilizing whitespace can enhance readability considerably.
+
+```perl
+# Good
+push @$it, $real, $good;
+map { throw_away bag_up $_ } grep { /poop/ } map { $_->walk } $dog, $cat;
+
+# Bad
+push( @{$it}, ($real, $good) );
+map(throw_away(bag_up($_)), (grep($_ =~ /poop/, (map ($_->walk(), ($dog, $cat))))));
+```
+
 ### Keep it under 80 characters
 
 Do not exceed 80 characters per line of code. There are exceptions, but generally if one cannot fit everything onto one line, it is best practice to break up the long statement into multiple lines.
