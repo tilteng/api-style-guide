@@ -75,13 +75,23 @@ my $person = {
 
 ### Keep it under 80 characters
 
-This rule is simple, do not exceed 80 characters per line of code. There are exceptions, but generally if one cannot fit everything onto one line, it is best practice to break up the long statement into multiple lines.
+Do not exceed 80 characters per line of code. There are exceptions, but generally if one cannot fit everything onto one line, it is best practice to break up the long statement into multiple lines.
 
 ```perl
 return $self->contributions->search({
     status  => [qw(status_one status_two status_three)],
     user_id => $self->user_id,
 })->get_column('netamount')->sum // 0;
+```
+
+### Follow snake_case convention
+
+Make sure you are naming methods and variables using the [snake_case](https://en.wikipedia.org/wiki/Snake_case) naming convention and not `camelCase`, `TitleCase`, or some other naming convention.
+
+```perl
+fun calculate_gross_profit_margin(Int $gross_profit, Int $total_revenue) {
+    return $gross_profit / $total_revenue;
+}
 ```
 
 ### Vertically align hashes
