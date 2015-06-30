@@ -155,9 +155,18 @@ my $locale  = locale_from_user_country_code $to->country_code;
 We should always use [MooseX::Modern](https://metacpan.org/pod/MooseX::Modern) or [MooseX::Modern::Role](https://metacpan.org/pod/MooseX::Modern::Role) when defining classes and roles. These libraries import several useful attribute shortcuts that align with our best practices. They also [automatically clean the namespace](https://metacpan.org/pod/namespace::autoclean) in which the Moose class is defined, so that only instance-based (OO) methods are exported.
 
 ```perl
-use MooseX::Modern;
+package My::Role;
+use MooseX::Modern::Role;
 
-# Attributes and methods here
+...
+```
+
+```perl
+package My::Class;
+use MooseX::Modern;
+with 'My::Role';
+
+...
 ```
 
 ### Always make classes immutable
