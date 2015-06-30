@@ -18,6 +18,17 @@
 use Tilt::Core;
 ```
 
+However, if another module that alters the current file with a custom [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) (Domain-specific language) is loaded first, such as Dancer or Moose, then that module should take precedence.
+
+```perl
+use Dancer;
+use Tilt::Core;
+
+...
+
+dance;
+```
+
 ### Favor strict mode
 
 It is better to import `Tilt::Core` with the `:strict_fp` flag instead of the default "lax" mode, and this utilizes [Function::Parameters :strict](https://metacpan.org/pod/Function::Parameters#Keyword) under the hood (enables argument checks so that an improper number of arguments will throw an error). We are still in the process of migrating our existing modules from "lax" to "strict", but we should follow this pattern for all greenfield development.
