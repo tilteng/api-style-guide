@@ -10,6 +10,22 @@
 
 ## General Perl
 
+Follow the [jQuery style guide](http://contribute.jquery.org/style-guide/js)
+
+The following rules take precedence over the jQuery guide:
+
+* Adhere to a strict 80-character line length.
+* The jQuery style guide calls for loose parens, but this optional. Use your discretion and maximize readability.
+* Try to add as few lines of code as possible without sacrificing readability.
+* Be conservative with vertical space. Avoid two or more blank lines in a row.
+* Indent with spaces, not tabs. 1 indentation level = 4 spaces.
+* Variable and function names should be `lower_case_with_underscores`.
+* Vertically align multiline key/value pairs. Add a trailing comma to every line.
+* Avoid unnecessary line noise, where line noise is defined as code that `=~ /\W/`
+* Avoid nesting ternary operators.
+* Prefix methods that return booleans with `is_`, `has_`, or `can_` (depending on context)
+* Do not rely on or write boolean methods to always return an integer (e.g. `0`/`1`). They may return any truthy/falsey value, e.g. `42` or `''`
+
 ### Always use Tilt::Core
 
 [Tilt::Core](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Core.pm) gives us a robust set of baseline Perl modules, pragmas, and features, and we should always be importing this module first.
