@@ -53,6 +53,34 @@ It is better to import `Tilt::Core` with the `:strict_fp` flag instead of the de
 use Tilt::Core qw(:strict_fp);
 ```
 
+### Named vs. positional arguments
+
+Favor named arguments for non-trivial function and method signatures. Named arguments are self-documenting, easy to test, and easy to extend, plus they play nicely with Function::Parameter's `strict` mode.
+
+Positional arguments are suitable for **trivial** functions, in which all arguments are required, ordering is obvious (or inconsequential), and change is unlikely.
+
+```perl
+# Good: positional = ok for simple subs
+my $sum = add($a, $b);
+my $sum = add(@nums);
+
+# Good: named = perfect for complicated subs
+transfer(
+    source      => $source,                      # required
+    destination => $destination,                 # required
+    amount      => $amount,                      # required
+    description => "Contribution to 'Some Tilt'" # optional
+);
+
+# Bad: positional args don't scale well
+transfer($source, $destination, $amount, "Contribution to 'Some Tilt'");
+
+# Bad: mixing the two is confusing and complicated
+transfer($source, $destination, $amount,
+    description => "Contribution to 'Some Tilt'"
+);
+```
+
 ### Favor newer Tilt::* imports
 
 It is clearer to import the newer [Tilt::Error](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Error.pm) and [Tilt::Util](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Util.pm) modules over `Crowdtilt::Internal::Error` and the `Crowdtilt::Internal::Util::*` namespace.
