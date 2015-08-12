@@ -185,6 +185,10 @@ with 'My::Role';
 ...
 ```
 
+### Don't mix Moose and Exporter
+
+Packages should be either object-oriented or functional - don't mix styles. Keeping Moose and Exporter separate also helps to handle weird edge-cases when using `namespace::autoclean`.
+
 ### Always make classes immutable
 
 We should always be making classes immutable at the very bottom of our class definitions. Even if [MOP](https://metacpan.org/pod/Class::MOP) (Meta-Object Protocol, or metaprogramming) is to be utilized, it is still preferable to explicitly mark a class as mutable, and then back to immutable once those MOP operations are complete.
