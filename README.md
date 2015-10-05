@@ -4,7 +4,6 @@
 
 * [General Perl](#general-perl) – Best practices for [Perl](https://www.perl.org), our API's main language
 * [Moose](#moose) – Best practices for [Moose](https://metacpan.org/pod/Moose), our object system
-* [DBIC](#dbic) – Best practices for [DBIx::Class](https://metacpan.org/pod/DBIx::Class), our ORM library
 * [Tests](#tests) – Best practices for our `prove` and `TAP` based test harnesses
 * [Postgres](#postgres) – Best practices for [PostgreSQL](http://www.postgresql.org) and [PL/pgSQL](http://www.postgresql.org/docs/9.4/static/plpgsql.html), our RDBMS
 
@@ -25,42 +24,6 @@ The following rules take precedence over the jQuery guide:
 * Avoid nesting ternary operators.
 * Prefix methods that return booleans with `is_`, `has_`, or `can_` (depending on context)
 * Do not rely on or write boolean methods to always return an integer (e.g. `0`/`1`). They may return any truthy/falsey value, e.g. `42` or `''`
-
-### Always use Tilt::Core
-
-[Tilt::Core](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Core.pm) gives us a robust set of baseline Perl modules, pragmas, and features, and we should always be importing this module first.
-
-```perl
-use Tilt::Core;
-```
-
-However, if another module that alters the current file with a custom [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) (Domain-specific language) is loaded first, such as Dancer or Moose, then that module should take precedence.
-
-```perl
-use Dancer;
-use Tilt::Core;
-
-...
-
-dance;
-```
-
-### Favor strict mode
-
-It is better to import `Tilt::Core` with the `:strict_fp` flag instead of the default "lax" mode, and this utilizes [Function::Parameters :strict](https://metacpan.org/pod/Function::Parameters#Keyword) under the hood (enables argument checks so that an improper number of arguments will throw an error). We are still in the process of migrating our existing modules from "lax" to "strict", but we should follow this pattern for all greenfield development.
-
-```perl
-use Tilt::Core qw(:strict_fp);
-```
-
-### Favor newer Tilt::* imports
-
-It is clearer to import the newer [Tilt::Error](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Error.pm) and [Tilt::Util](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Util.pm) modules over `Crowdtilt::Internal::Error` and the `Crowdtilt::Internal::Util::*` namespace.
-
-```perl
-use Tilt::Error;
-use Tilt::Util qw(BankAccount Campaign User);
-```
 
 ### Use structured exception handling
 
@@ -152,18 +115,6 @@ my $vars = {
 };
 ```
 
-### Prefer vertically aligned assignments
-
-This one is not a hard requirement, but it can enhance readability for long stretches of [Assignment](https://metacpan.org/pod/distribution/perl/pod/perlop.pod#Assignment-Operators) `=` operators on variables.
-
-```perl
-my $from    = smart_rset('User')->on_crowdtilt->find($msg->{from_id});
-my $to      = smart_rset('User')->on_crowdtilt->find($msg->{to_id});
-my $body    = $msg->{body};
-my $subject = $msg->{subject};
-my $locale  = locale_from_user_country_code $to->country_code;
-```
-
 ## Moose
 
 ### Use Modern MooseX::* libraries
@@ -201,16 +152,6 @@ __PACKAGE__->meta->make_immutable;
 1;
 ```
 
-### Never override new
-
-We should never override `new`. Instead, we use `BUILD` or `BUILDARGS` to hook into object construction.
-
-The `BUILDARGS` method is called *before* an object has been created, and the primary purpose of `BUILDARGS` is to allow a class to accept something other than named arguments.
-
-The `BUILD` method is called *after* the object is constructed, but before it is returned to the caller, and provides an opportunity to check the object state as a whole. This is a good place to put logic that cannot be expressed as a type constraint on a single attribute.
-
-[Here](https://metacpan.org/pod/distribution/Moose/lib/Moose/Cookbook/Basics/Person_BUILDARGSAndBUILD.pod#SYNOPSIS) is an excellent example in the Moose cookbook for using both methods.
-
 ### Enforce immutable state
 
 We should enforce [read-only attributes](https://metacpan.org/pod/distribution/Moose/lib/Moose/Manual/Attributes.pod#Read-write-vs.-read-only) for immutable state. All attributes are defaulted to read-only thanks to an [attribute shortcut](https://metacpan.org/pod/MooseX::HasDefaults::RO) that we use internally, so the `ro` keyword is not explicitly needed in new attribute definitions.
@@ -238,8 +179,6 @@ has size => (
     },
 );
 ```
-
-## DBIC
 
 ## Tests
 
