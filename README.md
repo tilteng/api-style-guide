@@ -1,5 +1,10 @@
 # Tilt API Style Guide
 
+This style guide is a general style guide for our API perl coding practices
+and standards.  For more specific current best practices on specific features
+or areas of the codebase, see the corresponding `.md` file in this repo
+for more info on that topic.
+
 ## Table of Contents
 
 * [General Perl](#general-perl) – Best practices for [Perl](https://www.perl.org), our API's main language
@@ -8,6 +13,8 @@
 * [DBIC](#dbic) – Best practices for [DBIx::Class](https://metacpan.org/pod/DBIx::Class), our ORM library
 * [Tests](#tests) – Best practices for our `prove` and `TAP` based test harnesses
 * [Postgres](#postgres) – Best practices for [PostgreSQL](http://www.postgresql.org) and [PL/pgSQL](http://www.postgresql.org/docs/9.4/static/plpgsql.html), our RDBMS
+
+
 
 ## General Perl
 
