@@ -26,6 +26,7 @@ The following rules take precedence over the jQuery guide:
 * Avoid nesting ternary operators.
 * Prefix methods that return booleans with `is_`, `has_`, or `can_` (depending on context)
 * Do not rely on or write boolean methods to always return an integer (e.g. `0`/`1`). They may return any truthy/falsey value, e.g. `42` or `''`
+
 ### Always use tilt::core
 
 [tilt::core](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Core.pm) gives us a robust set of baseline Perl modules, pragmas, and features, and we should always be importing this module first.
