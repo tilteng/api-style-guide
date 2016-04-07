@@ -3,7 +3,9 @@
 ## Table of Contents
 
 * [General Perl](#general-perl) – Best practices for [Perl](https://www.perl.org), our API's main language
+* [Function Signatures](#function-signatures) - Best practices for function/method signatures
 * [Moose](#moose) – Best practices for [Moose](https://metacpan.org/pod/Moose), our object system
+* [DBIC](#dbic) – Best practices for [DBIx::Class](https://metacpan.org/pod/DBIx::Class), our ORM library
 * [Tests](#tests) – Best practices for our `prove` and `TAP` based test harnesses
 * [Postgres](#postgres) – Best practices for [PostgreSQL](http://www.postgresql.org) and [PL/pgSQL](http://www.postgresql.org/docs/9.4/static/plpgsql.html), our RDBMS
 
@@ -24,6 +26,41 @@ The following rules take precedence over the jQuery guide:
 * Avoid nesting ternary operators.
 * Prefix methods that return booleans with `is_`, `has_`, or `can_` (depending on context)
 * Do not rely on or write boolean methods to always return an integer (e.g. `0`/`1`). They may return any truthy/falsey value, e.g. `42` or `''`
+### Always use tilt::core
+
+[tilt::core](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Core.pm) gives us a robust set of baseline Perl modules, pragmas, and features, and we should always be importing this module first.
+
+```perl
+use tilt::core;
+```
+
+However, if another module that alters the current file with a custom [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) (Domain-specific language) is loaded first, such as Dancer or Moose, then that module should take precedence.
+
+```perl
+use Dancer;
+use tilt::core;
+
+...
+
+dance;
+```
+
+### Favor strict mode
+
+It is better to import `tilt::core` with the `:strict_fp` flag instead of the default "lax" mode, and this utilizes [Function::Parameters :strict](https://metacpan.org/pod/Function::Parameters#Keyword) under the hood (enables argument checks so that an improper number of arguments will throw an error). We are still in the process of migrating our existing modules from "lax" to "strict", but we should follow this pattern for all greenfield development.
+
+```perl
+use tilt::core qw(:strict_fp);
+```
+
+### Favor newer Tilt::* imports
+
+It is clearer to import the newer [Tilt::Error](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Error.pm) and [Tilt::Util](https://github.com/Crowdtilt/crowdtilt-internal-api/blob/dev/lib/Tilt/Util.pm) modules over `Crowdtilt::Internal::Error` and the `Crowdtilt::Internal::Util::*` namespace.
+
+```perl
+use Tilt::Error;
+use Tilt::Util qw(BankAccount Campaign User);
+```
 
 ### Use structured exception handling
 
@@ -115,6 +152,64 @@ my $vars = {
 };
 ```
 
+### Prefer vertically aligned assignments
+
+This one is not a hard requirement, but it can enhance readability for long stretches of [Assignment](https://metacpan.org/pod/distribution/perl/pod/perlop.pod#Assignment-Operators) `=` operators on variables.
+
+```perl
+my $from    = smart_rset('User')->on_crowdtilt->find($msg->{from_id});
+my $to      = smart_rset('User')->on_crowdtilt->find($msg->{to_id});
+my $body    = $msg->{body};
+my $subject = $msg->{subject};
+my $locale  = locale_from_user_country_code $to->country_code;
+```
+
+## Function Signatures
+
+`tilt::core` makes use of [Function::Parameters](https://metacpan.org/pod/Function::Parameters) under the hood, and our codebase tries to make use of `Function::Parameters` as much as possible.  It gives us (runtime) type checking, and cleaner function signatures with optionally typed parameter lists.
+
+With `Function::Parameters` we use the `fun` and `method` keywords for functions and methods, respectively.  The `method` keyword behaves the same as `fun`, except that it automatically populates the `$self` variable with the first argument to the function (making it a method).
+
+Here are some simple examples showing the standard `Perl` way, vs the `Function::Parameters` way:
+
+```perl
+# Perl way
+sub foo {
+    my ($bar, $baz) = @_;
+    ...
+}
+# F::P way
+fun foo($bar, $baz) {
+    ...
+}
+
+# Perl
+sub foo {
+    my (%args) = @_;
+    my $keyword = $args{keyword};
+    ...
+}
+# F::P (The ':' denotes a hash key value)
+fun foo (:$keyword) {
+    ...
+}
+
+# Setting a Type with F::P
+# Also *requires* $string to be passed
+fun foo (Str $string) { ... }
+
+# Specifying a Type + making field optional
+fun foo (Maybe[Str] $string = undef) { ... }
+
+# Specifying a Type + setting a default value
+fun foo (Str $string = 'default') { ... }
+
+# Specifying default hash value + Type check
+fun foo(ArrayRef :$array = []) { ... }
+```
+
+For more examples of how to use `Function::Parameters` see [here](https://metacpan.org/pod/Function::Parameters#SYNOPSIS).
+
 ## Moose
 
 ### Use Modern MooseX::* libraries
@@ -136,10 +231,6 @@ with 'My::Role';
 ...
 ```
 
-### Don't mix Moose and Exporter
-
-Packages should be either object-oriented or functional - don't mix styles. Keeping Moose and Exporter separate also helps to handle weird edge-cases when using `namespace::autoclean`.
-
 ### Always make classes immutable
 
 We should always be making classes immutable at the very bottom of our class definitions. Even if [MOP](https://metacpan.org/pod/Class::MOP) (Meta-Object Protocol, or metaprogramming) is to be utilized, it is still preferable to explicitly mark a class as mutable, and then back to immutable once those MOP operations are complete.
@@ -151,6 +242,16 @@ __PACKAGE__->meta->make_immutable;
 
 1;
 ```
+
+### Never override new
+
+We should never override `new`. Instead, we use `BUILD` or `BUILDARGS` to hook into object construction.
+
+The `BUILDARGS` method is called *before* an object has been created, and the primary purpose of `BUILDARGS` is to allow a class to accept something other than named arguments.
+
+The `BUILD` method is called *after* the object is constructed, but before it is returned to the caller, and provides an opportunity to check the object state as a whole. This is a good place to put logic that cannot be expressed as a type constraint on a single attribute.
+
+[Here](https://metacpan.org/pod/distribution/Moose/lib/Moose/Cookbook/Basics/Person_BUILDARGSAndBUILD.pod#SYNOPSIS) is an excellent example in the Moose cookbook for using both methods.
 
 ### Enforce immutable state
 
@@ -179,6 +280,8 @@ has size => (
     },
 );
 ```
+
+## DBIC
 
 ## Tests
 
