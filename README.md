@@ -218,6 +218,34 @@ fun foo(ArrayRef :$array = []) { ... }
 
 For more examples of how to use `Function::Parameters` see [here](https://metacpan.org/pod/Function::Parameters#SYNOPSIS).
 
+## Types
+
+Any class object can be used as a `Type` in `Moose` or with `Function::Parameters`, but the "primitive" types that are supported can be seen in the [Moose Types Manual](https://metacpan.org/pod/distribution/Moose/lib/Moose/Manual/Types.pod).  These are:
+
+```
+Any
+    Item
+        Bool
+        Maybe[`a]
+        Undef
+        Defined
+            Value
+                Str
+                    Num
+                        Int
+                    ClassName
+                    RoleName
+            Ref
+                ScalarRef[`a]
+                ArrayRef[`a]
+                HashRef[`a]
+                CodeRef
+                RegexpRef
+                GlobRef
+                FileHandle
+                Object
+```
+
 ## Moose
 
 ### Use Modern MooseX::* libraries
